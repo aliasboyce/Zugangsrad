@@ -2,31 +2,24 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Zugangsrad</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #121114;
-    --bg-soft: #19181b;
-    --ink: #241f19;
-    --paper: rgba(247,243,236,0.85);
-    --paper-dim: rgba(247,243,236,0.45);
-    --gold: #c9a769;
-    --gold-dim: #8f7649;
+    --bg: #121114; --bg-soft: #19181b; --ink: #241f19;
+    --paper: rgba(247,243,236,0.85); --paper-dim: rgba(247,243,236,0.45);
+    --gold: #c9a769; --gold-dim: #8f7649;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
     background: radial-gradient(circle at 50% 10%, var(--bg-soft), var(--bg) 72%);
-    color: var(--paper);
-    font-family:'Inter', sans-serif;
-    min-height:100vh;
-    display:flex; flex-direction:column; align-items:center;
-    padding: 26px 16px 70px;
+    color: var(--paper); font-family:'Inter', sans-serif; min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; padding: 26px 16px 70px;
   }
-  .app{ width:100%; max-width:1260px; display:flex; flex-direction:column; align-items:center; gap: 20px; }
+  .app{ width:100%; max-width:1300px; display:flex; flex-direction:column; align-items:center; gap: 20px; }
   header{ width:100%; display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; }
   h1{ font-family:'Fraunces', serif; font-weight:500; font-size: clamp(21px, 4.5vw, 28px); color: var(--paper); margin:0; }
   .subtitle{ font-size:12px; color: var(--paper-dim); margin-top:2px; font-style:italic; font-family:'Fraunces', serif; }
@@ -34,79 +27,106 @@
   button{
     font-family:'Inter', sans-serif; font-size:12px; font-weight:600; letter-spacing:0.02em;
     background: transparent; color: var(--gold); border: 1px solid var(--gold-dim); border-radius: 999px;
-    padding: 8px 15px; cursor:pointer; transition: background .15s ease, border-color .15s ease, transform .15s ease; white-space:nowrap;
+    padding: 8px 15px; cursor:pointer; transition: background .15s ease, border-color .15s ease, transform .1s ease; white-space:nowrap;
   }
   button:hover{ background: rgba(201,167,105,0.1); border-color: var(--gold); }
-  button:active{ transform: scale(0.96); }
+  button:active{ transform: scale(0.95); }
   button.primary{ background: var(--gold-dim); color: #16151a; border-color: var(--gold-dim); }
   button.primary:hover{ background: var(--gold); }
   button.ghost{ border-color: rgba(247,243,236,0.18); color: var(--paper-dim); }
   button.small{ padding:6px 12px; font-size:11px; }
+  button.icon{ padding:6px 11px; font-size:14px; }
 
-  /* ---------- LAYOUT ---------- */
+  @keyframes viewFadeIn{ from{ opacity:0; transform:translateY(8px);} to{ opacity:1; transform:translateY(0);} }
+  .view-fade-in{ animation: viewFadeIn .42s cubic-bezier(.22,.9,.32,1); }
+
   .layout{ width:100%; display:flex; gap:28px; align-items:flex-start; }
   @media (max-width: 760px){ .layout{ flex-direction:column; } }
-
   .sidebar{ width:250px; flex-shrink:0; display:flex; flex-direction:column; gap:14px; }
-  @media (max-width: 760px){ .sidebar{ width:100%; flex-direction:row; flex-wrap:wrap; } }
-  .sidebar-item{ display:flex; gap:10px; align-items:flex-start; }
+  @media (max-width: 760px){ .sidebar{ width:100%; flex-direction:row; flex-wrap:wrap; order:1; } }
+  .sidebar-item{ display:flex; gap:10px; align-items:flex-start; transition: opacity .45s ease, transform .2s ease; }
+  .sidebar-item:hover{ transform: translateX(3px); }
   @media (max-width: 760px){ .sidebar-item{ width:calc(50% - 8px); } }
-  .sidebar-num{
-    flex-shrink:0; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-    font-family:'Inter',sans-serif; font-weight:700; font-size:11px; color:#16151a;
-  }
+  .sidebar-item.intro-hidden{ opacity:0; }
+  .sidebar-num{ flex-shrink:0; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; font-weight:700; font-size:11px; color:#16151a; transition: transform .2s ease; }
+  .sidebar-item:hover .sidebar-num{ transform: scale(1.15); }
   .sidebar-text b{ display:block; font-family:'Fraunces',serif; font-weight:600; font-size:12.5px; line-height:1.3; }
   .sidebar-text span{ display:block; font-size:11px; line-height:1.35; opacity:0.7; margin-top:1px; }
 
-  .dial-column{ flex:1; min-width:300px; display:flex; flex-direction:column; align-items:center; gap:18px; }
+  .dial-column{ flex:1; min-width:300px; display:flex; flex-direction:column; align-items:center; gap:14px; }
+  @media (max-width: 760px){ .dial-column{ order:2; } }
 
-  .window-stack{ position:absolute; inset:0; pointer-events:none; z-index:16; }
-  .window-row{
-    position:absolute; left:50%; top:0;
-    transform: translate(-50%,-50%);
-    pointer-events:none;
+  .dial-zoom-wrap{ position:relative; width:100%; display:flex; justify-content:center; touch-action:none; }
+  .dial-wrap{
+    position:relative; width:100%; max-width: 860px; aspect-ratio: 1/1;
+    touch-action:none; user-select:none; -webkit-user-select:none;
+    transform-origin:center center; transition: transform .12s ease-out;
   }
-  .window-box{
-    clip-path: polygon(8% 0%, 92% 0%, 82% 100%, 18% 100%);
-    padding: 6px 15px 9px;
-    min-width: 82px; max-width:210px; text-align:center;
-    box-shadow: 0 8px 16px -8px rgba(0,0,0,0.55);
-    transition: transform .28s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease, top .28s cubic-bezier(.22,.7,.32,1);
-  }
-  .window-box.dragging{ transform: scale(1.85) translateY(-10px); box-shadow: 0 18px 36px -10px rgba(0,0,0,0.7); z-index:50; }
-  .window-box.dimmed{ opacity:0.3; transition: opacity .25s ease; }
-  .window-box span{
-    display:block; font-family:'Inter', sans-serif; font-weight:600; color: var(--ink);
-    font-size: clamp(10px, 1.7vw, 12.5px); line-height:1.25; word-break:break-word;
-    transition: opacity .2s ease;
-  }
+  .dial-wrap.zoomed{ z-index:40; }
+  .zoom-controls{ display:flex; align-items:center; gap:6px; }
+  .zoom-controls span{ font-size:11px; color:var(--paper-dim); min-width:34px; text-align:center; }
 
-  .dial-wrap{ position:relative; width:100%; max-width: 800px; aspect-ratio: 1/1; touch-action:none; user-select:none; -webkit-user-select:none; }
   .dial-shadow{ position:absolute; inset: 0.5%; border-radius:50%; box-shadow: 0 40px 90px -28px rgba(0,0,0,0.7); background: var(--bg-soft); }
   .guides{ position:absolute; inset:0; width:100%; height:100%; z-index:1; }
-  .band-label{ font-family:'Fraunces', serif; font-weight:600; fill: var(--ink); pointer-events:none; }
+  .ring-wrap{ transition: opacity .5s ease, transform .5s cubic-bezier(.22,.9,.32,1); transform-origin:50% 50%; }
+  .ring-wrap.intro-hidden{ opacity:0; transform:scale(0.82); }
   .marker-group{ cursor:grab; }
   .marker-group.snapping{ transition: transform .42s cubic-bezier(.34,1.56,.5,1); }
   .marker-group:active{ cursor:grabbing; }
   .marker-hit{ fill:transparent; }
-  .marker-group.dragging-band circle.band-visual{ filter: brightness(1.12); }
+  .marker-dot{ animation: dotPulse 3.2s ease-in-out infinite; }
+  @keyframes dotPulse{ 0%,100%{ opacity:0.82; } 50%{ opacity:1; } }
+  .snap-ripple{ fill:none; stroke-width:1.1; animation: rippleAnim .5s ease-out forwards; pointer-events:none; }
+  @keyframes rippleAnim{ from{ r:1.5; opacity:0.9; } to{ r:9; opacity:0; } }
+  @keyframes bandFlash{ 0%{ filter:brightness(1);} 35%{ filter:brightness(1.28);} 100%{filter:brightness(1);} }
+  .band-visual.flash{ animation: bandFlash .42s ease; }
 
   .hub{
     position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-    width:13%; height:13%; border-radius:50%;
-    background: radial-gradient(circle at 35% 30%, #e4c98f, var(--gold) 60%, var(--gold-dim) 100%);
-    box-shadow: 0 3px 12px rgba(0,0,0,0.5);
+    width:12.5%; height:12.5%; border-radius:50%;
+    background: radial-gradient(circle at 32% 28%, #efd7a0, #c9a769 55%, #7c6339 85%, #5a4726 100%);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(58,46,23,0.5), inset -2px -2px 5px rgba(0,0,0,0.28), inset 2px 2px 3px rgba(255,255,255,0.22);
     display:flex; align-items:center; justify-content:center; text-align:center; z-index:20;
     animation: breathe 5s ease-in-out infinite;
   }
-  @keyframes breathe{
-    0%,100%{ box-shadow: 0 3px 12px rgba(0,0,0,0.5); }
-    50%{ box-shadow: 0 3px 16px rgba(0,0,0,0.5), 0 0 14px rgba(217,189,135,0.4); }
-  }
-  .hub span{ font-family:'Fraunces', serif; font-weight:600; font-size: clamp(8px,1.7vw,11px); line-height:1.15; color:#211a10; padding: 0 3px; }
+  @keyframes breathe{ 0%,100%{ box-shadow: 0 3px 12px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(58,46,23,0.5), inset -2px -2px 5px rgba(0,0,0,0.28), inset 2px 2px 3px rgba(255,255,255,0.22); } 50%{ box-shadow: 0 3px 16px rgba(0,0,0,0.5), 0 0 14px rgba(217,189,135,0.4), inset 0 0 0 1px rgba(58,46,23,0.5), inset -2px -2px 5px rgba(0,0,0,0.28), inset 2px 2px 3px rgba(255,255,255,0.22); } }
+  .hub span{ font-family:'Fraunces', serif; font-weight:600; font-size: clamp(8px,1.6vw,10.5px); line-height:1.15; color:#211a10; padding: 0 3px; position:relative; z-index:2; }
   .hub .q{ display:block; font-weight:400; font-style:italic; font-size:0.85em; margin-top:1px; opacity:0.85; }
 
-  .readout{ width:100%; max-width:620px; background: rgba(255,255,255,0.025); border: 1px solid rgba(201,167,105,0.2); border-radius: 14px; padding: 16px 20px; }
+  .window-stack{ position:absolute; inset:0; z-index:16; pointer-events:none; }
+  .window-row{ position:absolute; left:50%; top:0; transform: translate(-50%,-50%); pointer-events:none; transition: opacity .45s ease; }
+  .window-row.intro-hidden{ opacity:0; }
+  .window-box{
+    position:relative; overflow:hidden;
+    clip-path: polygon(8% 0%, 92% 0%, 82% 100%, 18% 100%);
+    padding: 6px 15px 9px; min-width: 78px; max-width:158px; text-align:center;
+    box-shadow: 0 8px 16px -8px rgba(0,0,0,0.55);
+    transition: transform .28s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease, top .28s cubic-bezier(.22,.7,.32,1);
+  }
+  .window-box::before{
+    content:''; position:absolute; inset:0;
+    clip-path: polygon(8% 0%, 92% 0%, 82% 100%, 18% 100%);
+    background: linear-gradient(135deg, rgba(255,255,255,0.28), rgba(255,255,255,0) 45%, rgba(0,0,0,0.16) 100%);
+    pointer-events:none;
+  }
+  .window-box::after{
+    content:''; position:absolute; top:0; right:16%; width:0; height:0;
+    border-style:solid; border-width:0 7px 7px 0; border-color: transparent rgba(0,0,0,0.2) transparent transparent;
+  }
+  .window-box.dragging{ transform: scale(1.9) translateY(-10px); box-shadow: 0 18px 36px -10px rgba(0,0,0,0.7); z-index:50; }
+  .window-box.dimmed{ opacity:0.3; transition: opacity .25s ease; }
+  .window-box.unsure{ background: linear-gradient(180deg, #4a4640, #3a3630) !important; border-bottom-color: #2a2722 !important; }
+  .window-box.unsure span{ color: rgba(247,243,236,0.75); font-style:italic; font-weight:500; }
+  .window-box span{
+    position:relative; z-index:2; display:block; font-family:'Inter', sans-serif; font-weight:600; color: var(--ink);
+    font-size: clamp(10px, 1.6vw, 12px); line-height:1.25; transition: opacity .2s ease;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:128px;
+    animation: idleTextPulse 4.2s ease-in-out infinite; animation-delay: calc(var(--i,0) * 0.17s);
+  }
+  @keyframes idleTextPulse{ 0%,100%{ opacity:0.9; } 50%{ opacity:1; } }
+  .window-box.dragging span{ white-space:normal; overflow:visible; text-overflow:clip; max-width:220px; animation:none; }
+
+  .readout{ width:100%; max-width:860px; background: rgba(255,255,255,0.025); border: 1px solid rgba(201,167,105,0.2); border-radius: 14px; padding: 16px 20px; }
   .readout h3{ margin:0 0 10px; font-family:'Fraunces',serif; font-weight:500; font-size:13px; color:var(--paper-dim); text-transform:uppercase; letter-spacing:0.08em; }
   .readout-list{ display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
   .readout-row{ display:flex; align-items:baseline; gap:9px; font-size:13px; }
@@ -119,13 +139,12 @@
   .toast{ font-size:12px; color:#8fd99a; opacity:0; transition: opacity .3s ease; }
   .toast.show{ opacity:1; }
 
-  .notes{ width:100%; max-width:620px; background: rgba(255,255,255,0.025); border: 1px solid rgba(201,167,105,0.2); border-radius: 14px; padding: 16px 20px; }
+  .notes{ width:100%; max-width:860px; background: rgba(255,255,255,0.025); border: 1px solid rgba(201,167,105,0.2); border-radius: 14px; padding: 16px 20px; }
   .notes h3{ margin:0 0 8px; font-family:'Fraunces',serif; font-weight:500; font-size:13px; color:var(--paper-dim); text-transform:uppercase; letter-spacing:0.08em; }
   .notes textarea{ width:100%; min-height:90px; resize:vertical; background: rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:10px 12px; color: var(--paper); font-family:'Inter',sans-serif; font-size:13.5px; line-height:1.5; }
   .notes textarea:focus{ outline:none; border-color: var(--gold-dim); }
   .hint{ font-size:11px; color: rgba(255,255,255,0.28); text-align:center; }
 
-  /* ---------- EDITOR ---------- */
   .editor{ width:100%; display:flex; flex-direction:column; gap:14px; }
   .editor-section{ background: rgba(255,255,255,0.025); border:1px solid rgba(201,167,105,0.18); border-left-width:4px; border-radius:14px; padding:14px 16px; }
   .editor-section-head{ display:flex; flex-direction:column; gap:4px; margin-bottom:10px; }
@@ -137,15 +156,15 @@
   .chip button{ all:unset; cursor:pointer; width:16px; height:16px; display:flex; align-items:center; justify-content:center; border-radius:50%; color: rgba(255,255,255,0.5); font-size:12px; line-height:1; }
   .chip button:hover{ background: rgba(255,80,80,0.25); color:#fff; }
   .suggest-label{ font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em; color: var(--paper-dim); margin: 8px 0 6px; }
-  .chip.suggest{ background: transparent; border-style:dashed; color: var(--paper-dim); cursor:pointer; padding: 5px 12px; }
-  .chip.suggest:hover{ color: var(--paper); border-color: var(--gold); }
+  .chip.suggest{ background: transparent; border-style:dashed; color: var(--paper-dim); cursor:pointer; padding: 5px 12px; transition: transform .15s ease; }
+  .chip.suggest:hover{ color: var(--paper); border-color: var(--gold); transform: translateY(-1px); }
+  .fixed-note{ font-size:11px; color: var(--paper-dim); font-style:italic; margin: 10px 0 0; }
   .add-row{ display:flex; gap:8px; margin-top:10px; }
   .add-row input{ flex:1; background: rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:8px 10px; color: var(--paper); font-family:'Inter',sans-serif; font-size:13px; }
   .add-row input:focus{ outline:none; border-color: var(--gold); }
   .editor-footer{ display:flex; justify-content:space-between; gap:10px; margin-top:2px; }
   .saved-note{ font-size:11px; color: rgba(255,255,255,0.3); text-align:center; }
 
-  /* ---------- CHAINS ---------- */
   .chains{ width:100%; display:flex; flex-direction:column; gap:14px; }
   .chain-card{ background: rgba(255,255,255,0.025); border:1px solid rgba(201,167,105,0.18); border-radius:14px; padding:14px 16px; }
   .chain-head{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
@@ -160,7 +179,15 @@
   .chain-delete:hover{ color:#ff8f8f; }
   .chains-empty{ text-align:center; color: var(--paper-dim); font-size:13px; padding: 30px 0; font-family:'Fraunces',serif; font-style:italic; }
 
-  /* ---------- MODAL ---------- */
+  .colors-view{ width:100%; display:flex; flex-direction:column; gap:16px; }
+  .colors-card{ background: rgba(255,255,255,0.025); border:1px solid rgba(201,167,105,0.2); border-radius:14px; padding:18px 20px; }
+  .preset-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:6px; }
+  .color-row{ display:flex; align-items:center; gap:14px; padding:9px 0; border-bottom:1px solid rgba(255,255,255,0.06); }
+  .color-row:last-child{ border-bottom:none; }
+  .color-row .swatch-label{ flex:1; font-family:'Fraunces',serif; font-weight:600; font-size:13.5px; }
+  .color-row input[type=color]{ width:38px; height:38px; border:none; border-radius:8px; background:none; cursor:pointer; padding:0; }
+  .colors-footer{ display:flex; justify-content:space-between; gap:10px; }
+
   .modal-backdrop{ position:fixed; inset:0; background: rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:100; padding:20px; }
   .modal-backdrop.open{ display:flex; }
   .modal{ background: var(--bg-soft); border:1px solid rgba(201,167,105,0.3); border-radius:16px; max-width:560px; width:100%; padding:26px 26px 20px; max-height:85vh; overflow-y:auto; }
@@ -176,8 +203,11 @@
   .cat-block{ margin-bottom:16px; padding-left:12px; border-left:3px solid; }
   .cat-block .cat-title{ font-family:'Fraunces',serif; font-weight:600; font-size:13.5px; margin-bottom:2px; }
   .cat-block .cat-q{ font-size:12px; font-style:italic; color: var(--paper-dim); margin-bottom:6px; }
+  .cat-block .cat-rationale{ font-size:11.5px; color: var(--paper-dim); margin-bottom:8px; }
   .cat-block .cat-examples{ font-size:12px; color: var(--paper-dim); line-height:1.6; }
-  .cat-block .cat-examples i{ color: var(--paper-dim); }
+  .cat-table{ width:100%; border-collapse:collapse; margin:6px 0 10px; font-size:11.5px; }
+  .cat-table td{ padding:3px 6px; border-bottom:1px solid rgba(255,255,255,0.08); color:var(--paper-dim); }
+  .cat-table td:first-child{ color:var(--paper); font-style:italic; white-space:nowrap; }
   .modal .close-row{ text-align:right; margin-top:10px; }
 </style>
 </head>
@@ -192,6 +222,7 @@
     <div class="header-actions">
       <button class="ghost" id="openHelp">Anleitung</button>
       <button class="ghost" id="openChains">Ketten</button>
+      <button class="ghost" id="openColors">Farben</button>
       <button id="openEdit">Bearbeiten</button>
     </div>
   </header>
@@ -200,11 +231,19 @@
     <div class="layout">
       <div class="sidebar" id="sidebar"></div>
       <div class="dial-column">
-        <div class="dial-wrap" id="dialWrap">
-          <div class="dial-shadow"></div>
-          <svg class="guides" viewBox="0 0 100 100" id="guideSvg"></svg>
-          <div class="window-stack" id="windowStack"></div>
-          <div class="hub"><span>Ich jetzt<span class="q">Wo bin ich gerade?</span></span></div>
+        <div class="dial-zoom-wrap" id="dialZoomWrap">
+          <div class="dial-wrap" id="dialWrap">
+            <div class="dial-shadow"></div>
+            <svg class="guides" viewBox="0 0 100 100" id="guideSvg"></svg>
+            <div class="window-stack" id="windowStack"></div>
+            <div class="hub"><span>Ich jetzt<span class="q">Wo bin ich gerade?</span></span></div>
+          </div>
+        </div>
+        <div class="zoom-controls">
+          <button class="ghost icon small" id="zoomOut">－</button>
+          <span id="zoomLabel">100%</span>
+          <button class="ghost icon small" id="zoomIn">＋</button>
+          <button class="ghost small" id="zoomReset">Zurücksetzen</button>
         </div>
 
         <div class="readout">
@@ -223,13 +262,14 @@
           <div class="hint" style="margin-top:6px;">Nur auf diesem Gerät sichtbar, wird automatisch gespeichert.</div>
         </div>
 
-        <div class="hint">Ring an beliebiger Stelle fassen und drehen. Oben erscheint deine aktuelle Wahl.</div>
+        <div class="hint">Ring an beliebiger Stelle fassen und drehen. Mit zwei Fingern kannst du zusätzlich hineinzoomen. Volles Wort steht beim Drehen groß im Fenster und immer unter "Aktueller Stand".</div>
       </div>
     </div>
   </div>
 
   <div class="editor" id="editorView" style="display:none;"></div>
   <div class="chains" id="chainsView" style="display:none;"></div>
+  <div class="colors-view" id="colorsView" style="display:none;"></div>
 </div>
 
 <div class="modal-backdrop" id="helpModal">
@@ -253,11 +293,13 @@
     <h3 class="section">So funktioniert es</h3>
     <ol>
       <li><b>Drehen:</b> Jeden farbigen Ring an einer beliebigen Stelle mit Maus oder Finger fassen und drehen.</li>
-      <li><b>Fenster lesen:</b> Oben, in der farbigen Fenster-Reihe, erscheint für jeden Ring das, was gerade eingestellt ist.</li>
-      <li><b>Beschriftung:</b> Auf jedem Ring steht der Titel dieser Ebene, die passende Frage steht links daneben, nummeriert.</li>
+      <li><b>Fenster lesen:</b> Oben, in der farbigen Fenster-Reihe, erscheint für jeden Ring das, was gerade eingestellt ist. Beim Drehen wird das Fenster groß und zeigt den vollen Text.</li>
+      <li><b>Beschriftung:</b> Die passende Frage zu jedem Ring steht links, nummeriert.</li>
       <li><b>Eigene Wörter eintragen:</b> Über "Bearbeiten" lassen sich Wörter hinzufügen, löschen und Titel/Fragen anpassen — dort gibt es auch Vorschläge zum Antippen.</li>
+      <li><b>Weiß ich gerade nicht:</b> Jeder Ring hat diese Option immer zusätzlich verfügbar — du musst nie sofort eine Antwort parat haben.</li>
       <li><b>Notizen:</b> Unter dem Rad ist Platz für eigene Gedanken.</li>
       <li><b>Ketten speichern:</b> Ist das Rad eingestellt, kann die aktuelle Kombination als "Kette" mit Namen gespeichert werden — mit Platz für eine spätere Reflexion, ob sie geholfen hat.</li>
+      <li><b>Farben anpassen:</b> Über "Farben" lässt sich jeder Ring in einer eigenen Farbe einstellen.</li>
       <li><b>Speicherung:</b> Alles bleibt automatisch auf diesem Gerät erhalten, bis es bewusst geändert wird.</li>
     </ol>
 
@@ -271,14 +313,46 @@
 
 <script>
 (function(){
-  const HUES = [4, 32, 58, 92, 150, 188, 218, 255, 292];
-  function ringColor(i, s, l){ return `hsl(${HUES[i]}, ${s}%, ${l}%)`; }
+  const UNSURE = 'Weiß ich gerade nicht';
+  const HUES = [4, 37, 70, 104, 137, 170, 204, 237, 270, 304];
+  const PRESETS = {
+    rainbow: { label:'Pastell-Regenbogen', hues:[4, 37, 70, 104, 137, 170, 204, 237, 270, 304] },
+    warm:    { label:'Warm & Erdig',       hues:[6, 22, 36, 50, 65, 95, 20, 355, 325, 290] },
+    cool:    { label:'Kühl & Ruhig',       hues:[150, 165, 181, 196, 212, 227, 243, 258, 274, 290] }
+  };
+
+  let customHues = null;
+  function activeHue(i){ return (customHues && customHues[i]!=null) ? customHues[i] : HUES[i]; }
+  function ringColor(i, s, l){ return `hsl(${activeHue(i)}, ${s}%, ${l}%)`; }
+
+  function hexToHue(hex){
+    hex = hex.replace('#','');
+    const r=parseInt(hex.substr(0,2),16)/255, g=parseInt(hex.substr(2,2),16)/255, b=parseInt(hex.substr(4,2),16)/255;
+    const max=Math.max(r,g,b), min=Math.min(r,g,b); let h=0;
+    if(max!==min){
+      const d=max-min;
+      if(max===r) h=((g-b)/d + (g<b?6:0));
+      else if(max===g) h=((b-r)/d + 2);
+      else h=((r-g)/d + 4);
+      h*=60;
+    }
+    return Math.round(h);
+  }
+  function hslToHex(h,s,l){
+    s/=100; l/=100;
+    const k=n=>(n+h/30)%12;
+    const a=s*Math.min(l,1-l);
+    const f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));
+    const toHex=x=>Math.round(255*x).toString(16).padStart(2,'0');
+    return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+  }
 
   const DEFAULTS = [
     { key:'koerper', title:'Körperwahrnehmung', question:'Was nehme ich gerade in meinem Körper wahr?', words:['– bearbeiten –'] },
-    { key:'ueberleben', title:'Überlebenszustand', question:'Wie reagiert mein Nervensystem?', words:['Verbunden','Mobilisiert','Kampf','Flucht','Erstarren','Kollaps','Angepasst (Fawn)'] },
+    { key:'ueberleben', title:'Überlebenszustand', question:'Wie reagiert mein Nervensystem?', words:['🌿 verbunden','⚡ mobilisiert (viel Energie)','🏃 Flucht (Gedanken, Aktivität)','🥊 Kampf (Druck, Gereiztheit)','🧊 Erstarren (alles fühlt sich weit weg an)','🪨 Kollaps (erschöpft, nichts geht mehr)','🤝 Angepasst (funktionieren müssen)'] },
     { key:'gefuehl', title:'Gefühl', question:'Welches Gefühl liegt da eigentlich darunter?', words:['– bearbeiten –'] },
     { key:'schutz', title:'Schutzstrategie / Handlungsimpuls', question:'Was versucht mein System zu tun, um Sicherheit herzustellen?', words:['– bearbeiten –'] },
+    { key:'fuersorge', title:'Fürsorge', question:'Wenn jetzt ein Mensch da wäre, bei dem du dich sicher fühlst – was würdest du dir wünschen, dass diese Person tut oder sagt?', words:['– bearbeiten –'] },
     { key:'beduerfnis', title:'Eigentliches Bedürfnis', question:'Was brauche ich jetzt eigentlich?', words:['– bearbeiten –'] },
     { key:'dazwischen', title:'Was steht dazwischen?', question:'Was steht zwischen mir und diesem Bedürfnis?', words:['– bearbeiten –'] },
     { key:'bruecke', title:'Brücke', question:'Welche Brücke könnte heute helfen?', words:['– bearbeiten –'] },
@@ -287,25 +361,38 @@
   ];
 
   const EXAMPLES = [
-    ['Druck im Brustkorb','Kloß im Hals','Enge','Kälte','Wärme','Zittern','Schwere in den Beinen','Kribbeln','Taubheit','Nebel im Kopf'],
-    ['Verbunden','Mobilisiert','Kampf','Flucht','Erstarren','Kollaps','Angepasst (Fawn)'],
-    ['Angst','Wut','Trauer','Scham','Ohnmacht','Einsamkeit','Überforderung','Sehnsucht','Erleichterung','Hoffnung'],
-    ['Rückzug','Kontrolle behalten','sich klein machen','alles perfekt machen wollen','weglaufen wollen','erstarren','sich betäuben','andere besänftigen','wachsam bleiben','dissoziieren'],
-    ['Sicherheit','Halt','gesehen werden','Ruhe','Orientierung','Schutz','Nähe','Abstand','Verlässlichkeit','Selbstbestimmung'],
+    ['schwere Augen','benommen','Watte im Kopf','Druck im Körper','flache Atmung','innere Unruhe','Herzklopfen','frieren','angespannt','leer'],
+    ['🌿 verbunden','⚡ mobilisiert (viel Energie)','🏃 Flucht (Gedanken, Aktivität)','🥊 Kampf (Druck, Gereiztheit)','🧊 Erstarren (alles fühlt sich weit weg an)','🪨 Kollaps (erschöpft, nichts geht mehr)','🤝 Angepasst (funktionieren müssen)'],
+    ['Angst','Traurigkeit','Einsamkeit','Sehnsucht','Enttäuschung','Leere','Verlorenheit'],
+    ['abschalten','nichts mehr fühlen','versuch wieder Kontrolle zu bekommen','analysieren','möglichst still werden'],
+    ['zuhören','sortieren','Tee machen','spazieren gehen','einfach da sein','mitdenken','erinnern','mit mir schweigen'],
+    ['🫂 Sicherheit','🌤 Orientierung ("Was passiert gerade mit mir?")','Chaos sortieren','🤍 Getragen werden','🏡 Geborgenheit','🌱 Langsam wieder ins Jetzt finden','☀️ Dass jemand bei mir bleibt','Entlastung','kognitive Co-Regulation','Regulation','Fürsorge','Autonomie','Freiheit'],
     ['Angst vor Nähe','ein altes Beschämungsmuster','eine Stimme aus der Vergangenheit','Misstrauen','Erschöpfung','ein innerer Kritiker','Zeitmangel','"ich darf das nicht"','Angst vor Kontrollverlust'],
     ['tief durchatmen','Füße spüren','eine Nachricht schreiben','kurz rausgehen','Wasser trinken','sich hinsetzen und ankommen','um Begleitung bitten','eine feste Struktur nutzen','"ich bin heute, nicht damals"'],
-    ['Musik','ein Spaziergang','ein vertrauter Mensch','die eigene Wohnung','ein Haustier','Sonnenlicht','eine kleine Aufgabe','Kreativität','die eigene Stimme','ein Ritual'],
+    ['Kreativität','Produktivität','Soziale und emotionale Verbindung','Verantwortung','Dankbarkeit','Gerechtigkeit','Familie und Partnerschaft','Freundschaft','Gefühl, Teil einer Gemeinschaft zu sein','Identität','Tageslicht','Rhythmus, Einklang','Verbindung zur Natur und Umwelt','Tiere','Schlaf, Erholung','Wasser und Nahrung','Bewegung','Integrität & Ehrlichkeit'],
     ['eine Pause machen','jemanden anrufen','aufschreiben was los ist','sich etwas Gutes tun','liegen bleiben dürfen','kurz rausgehen','Hilfe holen','eine Kleinigkeit erledigen','sich hinlegen','eine Grenze setzen'],
   ];
 
-  const N = 9;
-  const HUB_FRAC = 0.10, OUTER_FRAC = 0.99;
+  const FUERSORGE_TABLE = [
+    ['„Ordne mit mir.“','Orientierung'],
+    ['„Bleib bei mir.“','Sicherheit / Co-Regulation'],
+    ['„Mach Tee.“','Fürsorge / Regulation'],
+    ['„Sag mir, dass das reicht.“','Entlastung'],
+    ['„Geh mit mir raus.“','Aktivierung + Verbindung'],
+    ['„Hilf mir entscheiden.“','Entscheidungssicherheit'],
+    ['„Frag mich nichts.“','Ruhe'],
+    ['„Erinnere mich.“','Orientierung / Selbstkontinuität'],
+  ];
+
+  const N = 10;
+  const HUB_FRAC = 0.09, OUTER_FRAC = 0.99;
   const BAND_WIDTH = (OUTER_FRAC - HUB_FRAC) / N;
   const BOUNDARIES = Array.from({length:N+1}, (_,i)=> HUB_FRAC + i*BAND_WIDTH);
-  const ARC_START = 10, ARC_END = 350;
+  const SVGNS = 'http://www.w3.org/2000/svg';
 
   let rings = null;
   const dialWrap = document.getElementById('dialWrap');
+  const dialZoomWrap = document.getElementById('dialZoomWrap');
   const guideSvg = document.getElementById('guideSvg');
   const readoutList = document.getElementById('readoutList');
   const windowStack = document.getElementById('windowStack');
@@ -313,11 +400,14 @@
   const dialView = document.getElementById('dialView');
   const editorView = document.getElementById('editorView');
   const chainsView = document.getElementById('chainsView');
+  const colorsView = document.getElementById('colorsView');
   const notesArea = document.getElementById('notesArea');
 
-  const STORAGE_KEY = 'zugangsrad_data_v1';
+  const STORAGE_KEY = 'zugangsrad_data_v2';
   const NOTES_KEY = 'zugangsrad_notes_v1';
   const CHAINS_KEY = 'zugangsrad_chains_v1';
+  const COLORS_KEY = 'zugangsrad_colors_v2';
+  const ONBOARD_KEY = 'zugangsrad_onboarded_v1';
 
   function loadData(){
     try{
@@ -332,14 +422,19 @@
   function loadNotes(){ try{ return localStorage.getItem(NOTES_KEY) || ''; }catch(e){ return ''; } }
   function saveNotes(){ try{ localStorage.setItem(NOTES_KEY, notesArea.value); }catch(e){} }
   function loadChains(){ try{ return JSON.parse(localStorage.getItem(CHAINS_KEY) || '[]'); }catch(e){ return []; } }
-  function saveChains(chains){ try{ localStorage.setItem(CHAINS_KEY, JSON.stringify(chains)); }catch(e){} }
+  function saveChains(c){ try{ localStorage.setItem(CHAINS_KEY, JSON.stringify(c)); }catch(e){} }
+  function loadColors(){ try{ const raw = localStorage.getItem(COLORS_KEY); if(raw){ const p = JSON.parse(raw); if(Array.isArray(p) && p.length===N) return p; } }catch(e){} return null; }
+  function saveColors(){ try{ localStorage.setItem(COLORS_KEY, JSON.stringify(customHues)); }catch(e){} }
+
+  function getWords(ring){ return ring.words.concat([UNSURE]); }
 
   function norm360(a){ a = a % 360; if(a<0) a+=360; return a; }
   function angleDiff(a,b){ let d = norm360(a-b); if(d > 180) d -= 360; return d; }
   function activeIndex(ring){
-    const seg = 360/ring.words.length;
+    const words = getWords(ring);
+    const seg = 360/words.length;
     let best = 0, bestDiff = 999;
-    ring.words.forEach((w,i)=>{
+    words.forEach((w,i)=>{
       const eff = norm360(i*seg + ring.rotation);
       const diff = Math.abs(angleDiff(eff,0));
       if(diff < bestDiff){ bestDiff = diff; best = i; }
@@ -349,10 +444,6 @@
   function polar(rUnits, angleDeg){
     const rad = angleDeg*Math.PI/180;
     return { x: 50 + rUnits*Math.sin(rad), y: 50 - rUnits*Math.cos(rad) };
-  }
-  function arcPathD(r, a0, a1){
-    const p0 = polar(r,a0), p1 = polar(r,a1);
-    return `M ${p0.x.toFixed(2)},${p0.y.toFixed(2)} A ${r.toFixed(2)},${r.toFixed(2)} 0 1 1 ${p1.x.toFixed(2)},${p1.y.toFixed(2)}`;
   }
 
   function buildSidebar(){
@@ -380,23 +471,22 @@
     rings.forEach((ring, idx)=>{
       const inner = BOUNDARIES[idx]*50, outer = BOUNDARIES[idx+1]*50;
       const mid = (inner+outer)/2;
-
       const row = document.createElement('div');
       row.className = 'window-row';
       row.dataset.mid = mid;
-
       const box = document.createElement('div');
       box.className = 'window-box';
       box.style.background = `linear-gradient(180deg, ${ringColor(idx,72,90)}, ${ringColor(idx,68,80)})`;
       box.style.borderBottom = `2px solid ${ringColor(idx,60,52)}`;
       const span = document.createElement('span');
-      span.textContent = ring.words[activeIndex(ring)] || '—';
+      span.style.setProperty('--i', idx);
+      const w = getWords(ring)[activeIndex(ring)] || '—';
+      span.textContent = w;
+      span.title = w;
       box.appendChild(span);
       row.appendChild(box);
       windowStack.appendChild(row);
-      ring._boxSpan = span;
-      ring._boxEl = box;
-      ring._rowEl = row;
+      ring._boxSpan = span; ring._boxEl = box; ring._rowEl = row;
     });
     positionWindows();
   }
@@ -404,22 +494,18 @@
   function positionWindows(){
     const size = dialWrap.clientWidth;
     if(!size) return;
-    // ideal position: top offset in px, based on each ring's own radius (outer ring = higher up)
     const items = rings.map(ring=>{
       const mid = parseFloat(ring._rowEl.dataset.mid);
-      const idealTopPx = (50 - mid) / 100 * size; // px from top of dial-wrap
+      const idealTopPx = (50 - mid) / 100 * size;
       return { ring, idealTopPx };
     });
-    // sort top-to-bottom (outermost ring first, since it sits highest)
     items.sort((a,b)=> a.idealTopPx - b.idealTopPx);
     let prevBottom = -Infinity;
-    const minGap = 6;
+    const minGap = 5;
     items.forEach(item=>{
-      const h = item.ring._boxEl.offsetHeight || 28;
+      const h = item.ring._boxEl.offsetHeight || 26;
       let top = item.idealTopPx;
-      if(top - h/2 < prevBottom + minGap){
-        top = prevBottom + minGap + h/2;
-      }
+      if(top - h/2 < prevBottom + minGap) top = prevBottom + minGap + h/2;
       item.ring._rowEl.style.top = top + 'px';
       prevBottom = top + h/2;
     });
@@ -427,65 +513,85 @@
 
   function buildDial(){
     guideSvg.innerHTML = '';
-    const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+    const defs = document.createElementNS(SVGNS,'defs');
+    const bevel = document.createElementNS(SVGNS,'linearGradient');
+    bevel.setAttribute('id','bevelGrad'); bevel.setAttribute('x1','0'); bevel.setAttribute('y1','0'); bevel.setAttribute('x2','1'); bevel.setAttribute('y2','1');
+    bevel.innerHTML = '<stop offset="0%" stop-color="#fff" stop-opacity="0.16"/><stop offset="50%" stop-color="#fff" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity="0.2"/>';
+    defs.appendChild(bevel);
+    const grainFilter = document.createElementNS(SVGNS,'filter');
+    grainFilter.setAttribute('id','grainFilter');
+    grainFilter.innerHTML = '<feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.05 0"/>';
+    defs.appendChild(grainFilter);
     guideSvg.appendChild(defs);
 
     rings.forEach((ring, idx)=>{
       const inner = BOUNDARIES[idx]*50, outer = BOUNDARIES[idx+1]*50;
       const mid = (inner+outer)/2;
-      const bandColor = ringColor(idx,55,80);
+      const sw = outer-inner;
+      const ringWrap = document.createElementNS(SVGNS,'g');
+      ringWrap.setAttribute('class','ring-wrap');
+      ringWrap.setAttribute('data-idx', idx);
 
-      const band = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      const band = document.createElementNS(SVGNS,'circle');
       band.setAttribute('class','band-visual');
-      band.setAttribute('cx','50'); band.setAttribute('cy','50');
-      band.setAttribute('r', mid.toFixed(2));
-      band.setAttribute('fill','none');
-      band.setAttribute('stroke', bandColor);
-      band.setAttribute('stroke-width', (outer-inner).toFixed(2));
-      guideSvg.appendChild(band);
+      band.setAttribute('cx','50'); band.setAttribute('cy','50'); band.setAttribute('r', mid.toFixed(2));
+      band.setAttribute('fill','none'); band.setAttribute('stroke', ringColor(idx,55,80)); band.setAttribute('stroke-width', sw.toFixed(2));
+      ringWrap.appendChild(band);
       ring._bandEl = band;
 
-      const divc = document.createElementNS('http://www.w3.org/2000/svg','circle');
-      divc.setAttribute('cx','50'); divc.setAttribute('cy','50');
-      divc.setAttribute('r', outer.toFixed(2));
-      divc.setAttribute('fill','none'); divc.setAttribute('stroke','rgba(0,0,0,0.14)'); divc.setAttribute('stroke-width','0.2');
-      guideSvg.appendChild(divc);
+      const bevelOverlay = document.createElementNS(SVGNS,'circle');
+      bevelOverlay.setAttribute('cx','50'); bevelOverlay.setAttribute('cy','50'); bevelOverlay.setAttribute('r', mid.toFixed(2));
+      bevelOverlay.setAttribute('fill','none'); bevelOverlay.setAttribute('stroke','url(#bevelGrad)'); bevelOverlay.setAttribute('stroke-width', sw.toFixed(2));
+      ringWrap.appendChild(bevelOverlay);
 
-      const n = ring.words.length, seg = 360/n;
+      const grainOverlay = document.createElementNS(SVGNS,'circle');
+      grainOverlay.setAttribute('cx','50'); grainOverlay.setAttribute('cy','50'); grainOverlay.setAttribute('r', mid.toFixed(2));
+      grainOverlay.setAttribute('fill','none'); grainOverlay.setAttribute('stroke','#000'); grainOverlay.setAttribute('stroke-opacity','0.5'); grainOverlay.setAttribute('stroke-width', sw.toFixed(2));
+      grainOverlay.setAttribute('filter','url(#grainFilter)');
+      ringWrap.appendChild(grainOverlay);
+
+      const words = getWords(ring);
+      const n = words.length, seg = 360/n;
       for(let i=0;i<n;i++){
         const a = i*seg;
         const p1 = polar(inner+1.2, a), p2 = polar(outer-1.2, a);
-        const tick = document.createElementNS('http://www.w3.org/2000/svg','line');
+        const tick = document.createElementNS(SVGNS,'line');
         tick.setAttribute('x1',p1.x.toFixed(2)); tick.setAttribute('y1',p1.y.toFixed(2));
         tick.setAttribute('x2',p2.x.toFixed(2)); tick.setAttribute('y2',p2.y.toFixed(2));
-        tick.setAttribute('stroke','rgba(36,31,25,0.18)');
-        tick.setAttribute('stroke-width','0.28');
-        guideSvg.appendChild(tick);
+        tick.setAttribute('stroke','rgba(36,31,25,0.18)'); tick.setAttribute('stroke-width','0.28');
+        ringWrap.appendChild(tick);
       }
 
-      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      const divc = document.createElementNS(SVGNS,'circle');
+      divc.setAttribute('cx','50'); divc.setAttribute('cy','50'); divc.setAttribute('r', outer.toFixed(2));
+      divc.setAttribute('fill','none'); divc.setAttribute('stroke','rgba(0,0,0,0.16)'); divc.setAttribute('stroke-width','0.22');
+      ringWrap.appendChild(divc);
+
+      const g = document.createElementNS(SVGNS,'g');
       g.setAttribute('class','marker-group');
       g.setAttribute('data-idx', idx);
       g.setAttribute('transform', `rotate(${ring.rotation} 50 50)`);
       g.style.filter = `drop-shadow(0 0 2.5px ${ringColor(idx,70,60)})`;
 
-      const hit = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      const hit = document.createElementNS(SVGNS,'circle');
       const mp0 = polar(mid,0);
       hit.setAttribute('class','marker-hit');
       hit.setAttribute('cx', mp0.x.toFixed(2)); hit.setAttribute('cy', mp0.y.toFixed(2));
-      hit.setAttribute('r', ((outer-inner)/2 + 1.5).toFixed(2));
+      hit.setAttribute('r', (sw/2 + 1.5).toFixed(2));
       g.appendChild(hit);
 
-      const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
-      dot.setAttribute('cx', mp0.x.toFixed(2)); dot.setAttribute('cy', mp0.y.toFixed(2));
-      dot.setAttribute('r','1.5');
-      dot.setAttribute('fill', ringColor(idx,80,70));
-      dot.setAttribute('stroke', ringColor(idx,60,38));
-      dot.setAttribute('stroke-width','0.35');
+      const dot = document.createElementNS(SVGNS,'circle');
+      dot.setAttribute('class','marker-dot');
+      dot.setAttribute('cx', mp0.x.toFixed(2)); dot.setAttribute('cy', mp0.y.toFixed(2)); dot.setAttribute('r','1.5');
+      dot.setAttribute('fill', ringColor(idx,82,72)); dot.setAttribute('stroke', ringColor(idx,60,36)); dot.setAttribute('stroke-width','0.4');
+      dot.style.animationDelay = (idx*0.12)+'s';
       g.appendChild(dot);
 
-      guideSvg.appendChild(g);
+      ringWrap.appendChild(g);
       g.addEventListener('pointerdown', (e)=> onPointerDown(e, idx));
+      guideSvg.appendChild(ringWrap);
+      ring._ringWrap = ringWrap;
+      ring._markerGroup = g;
     });
 
     updateAll();
@@ -494,21 +600,30 @@
   function updateAll(){
     readoutList.innerHTML = '';
     rings.forEach((ring, i)=>{
-      const g = guideSvg.querySelector(`.marker-group[data-idx="${i}"]`);
+      const g = ring._markerGroup;
       if(g) g.setAttribute('transform', `rotate(${ring.rotation} 50 50)`);
+      const words = getWords(ring);
       const ai = activeIndex(ring);
-      const word = ring.words[ai] || '—';
+      const word = words[ai] || '—';
+      const isUnsure = word === UNSURE;
       if(ring._boxSpan && ring._boxSpan.textContent !== word){
         ring._boxSpan.style.opacity = '0';
-        setTimeout(()=>{ ring._boxSpan.textContent = word; ring._boxSpan.style.opacity = '1'; positionWindows(); }, 120);
+        setTimeout(()=>{
+          ring._boxSpan.textContent = word;
+          ring._boxSpan.title = word;
+          ring._boxSpan.style.opacity = '1';
+          if(ring._boxEl) ring._boxEl.classList.toggle('unsure', isUnsure);
+          positionWindows();
+        }, 120);
       } else if(ring._boxSpan){
         ring._boxSpan.textContent = word;
+        ring._boxSpan.title = word;
+        if(ring._boxEl) ring._boxEl.classList.toggle('unsure', isUnsure);
       }
       const row = document.createElement('div');
       row.className = 'readout-row';
       const dot = document.createElement('div');
-      dot.className = 'readout-dot';
-      dot.style.background = ringColor(i,75,65);
+      dot.className = 'readout-dot'; dot.style.background = ringColor(i,75,65);
       const b = document.createElement('b'); b.textContent = ring.title;
       const span = document.createElement('span'); span.textContent = word;
       row.appendChild(dot); row.appendChild(b); row.appendChild(span);
@@ -516,19 +631,38 @@
     });
   }
 
+  // ---------- drag / rotate ----------
   let dragState = null;
+  let activePointers = new Map();
+  let pinchState = null;
+  let currentZoom = 1;
+
   function centerOf(){ const rect = dialWrap.getBoundingClientRect(); return { x: rect.left+rect.width/2, y: rect.top+rect.height/2, size: rect.width }; }
   function pointerAngle(clientX, clientY, c){ const dx=clientX-c.x, dy=clientY-c.y; return Math.atan2(dx,-dy)*180/Math.PI; }
+  function vibrate(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} }
+
+  function spawnRipple(idx, ring){
+    const g = ring._markerGroup;
+    if(!g) return;
+    const mid = (BOUNDARIES[idx]*50 + BOUNDARIES[idx+1]*50)/2;
+    const p = polar(mid,0);
+    const ripple = document.createElementNS(SVGNS,'circle');
+    ripple.setAttribute('class','snap-ripple');
+    ripple.setAttribute('cx', p.x.toFixed(2)); ripple.setAttribute('cy', p.y.toFixed(2));
+    ripple.setAttribute('stroke', ringColor(idx,80,70));
+    g.appendChild(ripple);
+    setTimeout(()=>{ if(ripple.parentNode) ripple.parentNode.removeChild(ripple); }, 520);
+  }
 
   function onPointerDown(e, idx){
+    if(activePointers.size >= 2) return;
     e.preventDefault();
     const c = centerOf();
-    const g = guideSvg.querySelector(`.marker-group[data-idx="${idx}"]`);
-    if(g) g.classList.remove('snapping');
     const ring = rings[idx];
+    const g = ring._markerGroup;
+    if(g) g.classList.remove('snapping');
     if(ring._boxEl) ring._boxEl.classList.add('dragging');
     rings.forEach((r,i)=>{ if(i!==idx && r._boxEl) r._boxEl.classList.add('dimmed'); });
-    if(g) g.classList.add('dragging-band');
     const startAngle = pointerAngle(e.clientX, e.clientY, c);
     dragState = { idx, startAngle, startRotation: ring.rotation };
     window.addEventListener('pointermove', onPointerMove);
@@ -544,19 +678,84 @@
   }
   function onPointerUp(){
     if(!dragState) return;
-    const ring = rings[dragState.idx];
-    const seg = 360/ring.words.length;
+    const idx = dragState.idx;
+    const ring = rings[idx];
+    const words = getWords(ring);
+    const seg = 360/words.length;
     ring.rotation = Math.round(ring.rotation/seg)*seg;
-    const g = guideSvg.querySelector(`.marker-group[data-idx="${dragState.idx}"]`);
-    if(g){ g.classList.add('snapping'); g.classList.remove('dragging-band'); setTimeout(()=>g.classList.remove('snapping'), 460); }
+    const g = ring._markerGroup;
+    if(g){ g.classList.add('snapping'); setTimeout(()=>g.classList.remove('snapping'), 460); }
     if(ring._boxEl) ring._boxEl.classList.remove('dragging');
     rings.forEach(r=>{ if(r._boxEl) r._boxEl.classList.remove('dimmed'); });
+    if(ring._bandEl){ ring._bandEl.classList.remove('flash'); void ring._bandEl.offsetWidth; ring._bandEl.classList.add('flash'); }
+    spawnRipple(idx, ring);
+    vibrate(12);
     updateAll(); saveData();
     dragState = null;
     window.removeEventListener('pointermove', onPointerMove);
     window.removeEventListener('pointerup', onPointerUp);
   }
 
+  // ---------- pinch zoom ----------
+  function applyZoom(z){
+    currentZoom = Math.max(1, Math.min(2.6, z));
+    dialWrap.style.transform = `scale(${currentZoom})`;
+    dialWrap.classList.toggle('zoomed', currentZoom > 1.01);
+    document.getElementById('zoomLabel').textContent = Math.round(currentZoom*100) + '%';
+  }
+  document.getElementById('zoomIn').addEventListener('click', ()=> applyZoom(currentZoom + 0.25));
+  document.getElementById('zoomOut').addEventListener('click', ()=> applyZoom(currentZoom - 0.25));
+  document.getElementById('zoomReset').addEventListener('click', ()=> applyZoom(1));
+
+  function dist(p1,p2){ return Math.hypot(p1.x-p2.x, p1.y-p2.y); }
+
+  dialZoomWrap.addEventListener('pointerdown', (e)=>{
+    activePointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if(activePointers.size === 2){
+      if(dragState){ window.removeEventListener('pointermove', onPointerMove); window.removeEventListener('pointerup', onPointerUp); dragState=null; }
+      const pts = Array.from(activePointers.values());
+      pinchState = { startDist: dist(pts[0],pts[1]), startZoom: currentZoom };
+    }
+  });
+  window.addEventListener('pointermove', (e)=>{
+    if(!activePointers.has(e.pointerId)) return;
+    activePointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if(activePointers.size === 2 && pinchState){
+      const pts = Array.from(activePointers.values());
+      const d = dist(pts[0],pts[1]);
+      applyZoom(pinchState.startZoom * (d / pinchState.startDist));
+    }
+  });
+  function releasePointer(e){
+    activePointers.delete(e.pointerId);
+    if(activePointers.size < 2) pinchState = null;
+  }
+  window.addEventListener('pointerup', releasePointer);
+  window.addEventListener('pointercancel', releasePointer);
+
+  window.addEventListener('resize', ()=>{ clearTimeout(window._rzt); window._rzt = setTimeout(()=>{ if(rings && rings[0] && rings[0]._rowEl) positionWindows(); }, 120); });
+
+  // ---------- intro reveal ----------
+  function runIntroReveal(){
+    const ringWraps = rings.map(r=>r._ringWrap);
+    const winRows = rings.map(r=>r._rowEl);
+    const sideItems = sidebar.querySelectorAll('.sidebar-item');
+    ringWraps.forEach(el=>el && el.classList.add('intro-hidden'));
+    winRows.forEach(el=>el && el.classList.add('intro-hidden'));
+    sideItems.forEach(el=>el.classList.add('intro-hidden'));
+    setTimeout(()=>{
+      rings.forEach((r,i)=>{
+        setTimeout(()=>{
+          if(ringWraps[i]) ringWraps[i].classList.remove('intro-hidden');
+          if(winRows[i]) winRows[i].classList.remove('intro-hidden');
+          if(sideItems[i]) sideItems[i].classList.remove('intro-hidden');
+        }, i*120);
+      });
+      setTimeout(()=>{ try{ localStorage.setItem(ONBOARD_KEY,'1'); }catch(e){} }, rings.length*120 + 500);
+    }, 900);
+  }
+
+  // ---------- editor ----------
   function buildEditor(){
     editorView.innerHTML = '';
     rings.forEach((ring, idx)=>{
@@ -633,6 +832,12 @@
       input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); doAdd(); } });
       addRow.appendChild(input); addRow.appendChild(addBtn);
       section.appendChild(addRow);
+
+      const note = document.createElement('div');
+      note.className = 'fixed-note';
+      note.textContent = 'Zusätzlich ist auf diesem Ring immer die Option "Weiß ich gerade nicht" verfügbar — fest eingebaut, nicht löschbar.';
+      section.appendChild(note);
+
       editorView.appendChild(section);
     });
 
@@ -652,16 +857,16 @@
     footer.appendChild(resetBtn); footer.appendChild(doneBtn);
     editorView.appendChild(footer);
 
-    const note = document.createElement('div');
-    note.className = 'saved-note';
-    note.textContent = 'Änderungen werden automatisch auf diesem Gerät gespeichert.';
-    editorView.appendChild(note);
+    const savedNote = document.createElement('div');
+    savedNote.className = 'saved-note';
+    savedNote.textContent = 'Änderungen werden automatisch auf diesem Gerät gespeichert.';
+    editorView.appendChild(savedNote);
   }
 
+  // ---------- chains ----------
   function buildChains(){
     chainsView.innerHTML = '';
     const chains = loadChains();
-
     const topBtnRow = document.createElement('div');
     topBtnRow.style.textAlign = 'right';
     const backBtn = document.createElement('button');
@@ -678,7 +883,6 @@
       chainsView.appendChild(empty);
       return;
     }
-
     chains.slice().reverse().forEach(chain=>{
       const card = document.createElement('div');
       card.className = 'chain-card';
@@ -689,8 +893,7 @@
       const del = document.createElement('button'); del.className = 'chain-delete'; del.textContent = 'Löschen';
       del.addEventListener('click', ()=>{
         if(!confirm('Diese Kette wirklich löschen?')) return;
-        const all = loadChains().filter(c=>c.id !== chain.id);
-        saveChains(all); buildChains();
+        saveChains(loadChains().filter(c=>c.id !== chain.id)); buildChains();
       });
       head.appendChild(b); head.appendChild(date); head.appendChild(del);
       card.appendChild(head);
@@ -698,12 +901,10 @@
       const wordsRow = document.createElement('div');
       wordsRow.className = 'chain-words';
       (chain.entries||[]).forEach((entry, i)=>{
-        const w = document.createElement('div');
-        w.className = 'chain-word';
+        const w = document.createElement('div'); w.className = 'chain-word';
         const dot = document.createElement('div'); dot.className = 'dot'; dot.style.background = ringColor(i,75,65);
         const txt = document.createElement('span'); txt.textContent = entry.title + ': ' + entry.word;
-        w.appendChild(dot); w.appendChild(txt);
-        wordsRow.appendChild(w);
+        w.appendChild(dot); w.appendChild(txt); wordsRow.appendChild(w);
       });
       card.appendChild(wordsRow);
 
@@ -723,30 +924,99 @@
       });
       refl.appendChild(ta);
       card.appendChild(refl);
-
       chainsView.appendChild(card);
     });
   }
 
-  function setMode(mode){
+  // ---------- colors ----------
+  function buildColorsView(){
+    colorsView.innerHTML = '';
+    const topRow = document.createElement('div');
+    topRow.style.textAlign = 'right';
+    const backBtn = document.createElement('button');
+    backBtn.className = 'primary';
+    backBtn.textContent = 'Zurück zum Rad';
+    backBtn.addEventListener('click', ()=> setMode('dial'));
+    topRow.appendChild(backBtn);
+    colorsView.appendChild(topRow);
+
+    const card = document.createElement('div');
+    card.className = 'colors-card';
+
+    const presetRow = document.createElement('div');
+    presetRow.className = 'preset-row';
+    Object.keys(PRESETS).forEach(key=>{
+      const btn = document.createElement('button');
+      btn.className = 'ghost small';
+      btn.textContent = PRESETS[key].label;
+      btn.addEventListener('click', ()=>{
+        customHues = PRESETS[key].hues.slice();
+        saveColors(); buildColorsView(); buildDial(); buildSidebar(); buildWindowStack();
+      });
+      presetRow.appendChild(btn);
+    });
+    card.appendChild(presetRow);
+
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'ghost small';
+    resetBtn.textContent = 'Eigene Farben zurücksetzen';
+    resetBtn.style.marginBottom = '14px';
+    resetBtn.addEventListener('click', ()=>{
+      customHues = null; saveColors(); buildColorsView(); buildDial(); buildSidebar(); buildWindowStack();
+    });
+    card.appendChild(resetBtn);
+
+    rings.forEach((ring, idx)=>{
+      const row = document.createElement('div');
+      row.className = 'color-row';
+      const label = document.createElement('div');
+      label.className = 'swatch-label';
+      label.textContent = (idx+1) + '. ' + ring.title;
+      label.style.color = ringColor(idx,65,72);
+      const input = document.createElement('input');
+      input.type = 'color';
+      input.value = hslToHex(activeHue(idx), 70, 60);
+      input.addEventListener('input', ()=>{
+        if(!customHues) customHues = HUES.slice();
+        customHues[idx] = hexToHue(input.value);
+        saveColors();
+        label.style.color = ringColor(idx,65,72);
+        buildDial(); buildSidebar(); buildWindowStack();
+      });
+      row.appendChild(label); row.appendChild(input);
+      card.appendChild(row);
+    });
+
+    colorsView.appendChild(card);
+  }
+
+  // ---------- mode switching ----------
+  function fadeInView(el){ el.classList.remove('view-fade-in'); void el.offsetWidth; el.classList.add('view-fade-in'); }
+
+  function setMode(mode, showIntro){
     dialView.style.display = mode==='dial' ? 'block' : 'none';
     editorView.style.display = mode==='edit' ? 'flex' : 'none';
     chainsView.style.display = mode==='chains' ? 'flex' : 'none';
+    colorsView.style.display = mode==='colors' ? 'flex' : 'none';
     if(mode==='dial'){
       rings.forEach(r=>{ if(r.words.length === 0) r.words = ['– bearbeiten –']; });
       buildDial(); buildSidebar(); buildWindowStack(); saveData();
+      if(showIntro) runIntroReveal();
+      fadeInView(dialView);
     }
-    if(mode==='edit') buildEditor();
-    if(mode==='chains') buildChains();
+    if(mode==='edit'){ buildEditor(); fadeInView(editorView); }
+    if(mode==='chains'){ buildChains(); fadeInView(chainsView); }
+    if(mode==='colors'){ buildColorsView(); fadeInView(colorsView); }
   }
 
   document.getElementById('openEdit').addEventListener('click', ()=> setMode('edit'));
   document.getElementById('openChains').addEventListener('click', ()=> setMode('chains'));
+  document.getElementById('openColors').addEventListener('click', ()=> setMode('colors'));
 
   document.getElementById('saveChainBtn').addEventListener('click', ()=>{
     const nameInput = document.getElementById('chainNameInput');
     const name = nameInput.value.trim();
-    const entries = rings.map(ring=>({ title: ring.title, word: ring.words[activeIndex(ring)] || '—' }));
+    const entries = rings.map(ring=>({ title: ring.title, word: getWords(ring)[activeIndex(ring)] || '—' }));
     const chains = loadChains();
     chains.push({ id: Date.now(), name: name || ('Kette ' + (chains.length+1)), date: new Date().toLocaleString('de-DE'), entries, reflection:'' });
     saveChains(chains);
@@ -756,12 +1026,10 @@
     setTimeout(()=> toast.classList.remove('show'), 1800);
   });
 
-  // notes
   notesArea.value = loadNotes();
   let notesTimer = null;
   notesArea.addEventListener('input', ()=>{ clearTimeout(notesTimer); notesTimer = setTimeout(saveNotes, 300); });
 
-  // help modal
   const helpModal = document.getElementById('helpModal');
   document.getElementById('openHelp').addEventListener('click', ()=> helpModal.classList.add('open'));
   document.getElementById('closeHelp').addEventListener('click', ()=> helpModal.classList.remove('open'));
@@ -776,22 +1044,44 @@
       block.style.borderLeftColor = ringColor(i,70,60);
       const t = document.createElement('div'); t.className = 'cat-title'; t.textContent = (i+1)+'. '+r.title;
       const q = document.createElement('div'); q.className = 'cat-q'; q.textContent = r.question;
+      block.appendChild(t); block.appendChild(q);
+
+      if(r.key === 'fuersorge'){
+        const rationale = document.createElement('div');
+        rationale.className = 'cat-rationale';
+        rationale.textContent = 'Unser Gehirn findet Bedürfnisse über Beziehung oft leichter als über die direkte Frage: „Was brauche ich?“';
+        block.appendChild(rationale);
+
+        const sub = document.createElement('div');
+        sub.className = 'cat-rationale';
+        sub.style.marginTop = '6px';
+        sub.innerHTML = '<i>Was wünsche ich mir gerade von einem sicheren Menschen? — übersetze:</i>';
+        block.appendChild(sub);
+
+        const table = document.createElement('table');
+        table.className = 'cat-table';
+        FUERSORGE_TABLE.forEach(row=>{
+          const tr = document.createElement('tr');
+          const td1 = document.createElement('td'); td1.textContent = row[0];
+          const td2 = document.createElement('td'); td2.textContent = '→ ' + row[1];
+          tr.appendChild(td1); tr.appendChild(td2);
+          table.appendChild(tr);
+        });
+        block.appendChild(table);
+      }
+
       const ex = document.createElement('div'); ex.className = 'cat-examples';
       ex.innerHTML = '<i>Beispiele/Ideen:</i> ' + (EXAMPLES[i]||[]).join(', ');
-      block.appendChild(t); block.appendChild(q); block.appendChild(ex);
+      block.appendChild(ex);
       container.appendChild(block);
     });
   }
   buildCategoriesInfo();
 
-  let resizeTimer = null;
-  window.addEventListener('resize', ()=>{
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(()=>{ if(rings && rings[0] && rings[0]._rowEl) positionWindows(); }, 120);
-  });
-
+  customHues = loadColors();
   rings = loadData();
-  setMode('dial');
+  const firstEver = !localStorage.getItem(ONBOARD_KEY);
+  setMode('dial', firstEver);
 })();
 </script>
 </body>
