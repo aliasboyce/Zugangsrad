@@ -178,8 +178,9 @@
     position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0;
     transition: opacity 1.1s ease, background 1.1s ease;
   }
-  #tofOverlay.tof-under{ opacity:1; background: radial-gradient(circle at 50% 40%, transparent 30%, rgba(70,90,140,0.16) 100%); }
-  #tofOverlay.tof-over{ opacity:1; background: radial-gradient(circle at 50% 40%, transparent 30%, rgba(180,90,60,0.16) 100%); }
+  #tofOverlay.tof-under{ opacity:1; background: radial-gradient(circle at 50% 35%, transparent 12%, rgba(70,95,150,0.34) 100%); }
+  #tofOverlay.tof-over{ opacity:1; background: radial-gradient(circle at 50% 35%, transparent 12%, rgba(195,95,60,0.34) 100%); }
+  #tofOverlay.tof-in{ opacity:1; background: radial-gradient(circle at 50% 35%, transparent 12%, rgba(85,165,110,0.34) 100%); }
 
   .hub.breathing{ animation: hubBreathePace 10s ease-in-out infinite; }
   @keyframes hubBreathePace{
@@ -299,8 +300,10 @@
           <button id="closePreCheck" style="position:absolute; top:10px; right:12px; background:none; border:none; color:var(--paper-dim); font-size:16px; cursor:pointer; padding:2px 6px;">×</button>
           <div class="source-cat-title" style="margin-bottom:8px;">Kurz ankommen, bevor's losgeht</div>
           <div class="source-note" style="margin-bottom:4px;">Ist gerade etwas um dich herum zu viel?</div>
-          <div id="sensoryChips" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;"></div>
-          <div class="source-note" style="margin-bottom:8px;">Wo bist du gerade ungefähr im Toleranzfenster?</div>
+          <div id="sensoryChips" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px;"></div>
+          <div id="sensoryMessages" style="display:flex; flex-direction:column; gap:4px; margin-bottom:16px;"></div>
+          <div class="source-cat-title" style="margin-bottom:4px; font-size:13px;">Toleranzfenster</div>
+          <div class="source-note" style="margin-bottom:8px;">Der Bereich, in dem du dich noch erreichbar und einigermaßen ausgeglichen fühlst. Darüber oder darunter wird vieles schwerer zugänglich.<br>Wo bist du gerade ungefähr?</div>
           <div id="tofSelector" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
         </div>
         <div class="dial-zoom-wrap" id="dialZoomWrap">
@@ -469,16 +472,16 @@
   function b64Decode(str){ return decodeURIComponent(atob(str).split('').map(c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join('')); }
 
   const DEFAULTS = [
-    { key:'koerper', title:'Körperwahrnehmung', question:'Was nehme ich gerade in meinem Körper wahr?', words:['– bearbeiten –'] },
+    { key:'koerper', title:'Körperwahrnehmung', question:'Was nehme ich gerade in meinem Körper wahr?', words:['schwere Augen','benommen','Watte im Kopf','Druck im Körper','flache Atmung'] },
     { key:'ueberleben', title:'Überlebenszustand', question:'Wie reagiert mein Nervensystem?', words:['🌿 verbunden','⚡ mobilisiert (viel Energie)','🏃 Flucht (Gedanken, Aktivität)','🥊 Kampf (Druck, Gereiztheit)','🧊 Erstarren (alles fühlt sich weit weg an)','🪨 Kollaps (erschöpft, nichts geht mehr)','🤝 Angepasst (funktionieren müssen)'] },
-    { key:'gefuehl', title:'Gefühl', question:'Welches Gefühl liegt da eigentlich darunter?', words:['– bearbeiten –'] },
-    { key:'schutz', title:'Schutzstrategie / Handlungsimpuls', question:'Was versucht mein System zu tun, um Sicherheit herzustellen?', words:['– bearbeiten –'] },
-    { key:'fuersorge', title:'Fürsorge', question:'Wenn jetzt ein Mensch da wäre, bei dem du dich sicher fühlst – was würdest du dir wünschen, dass diese Person tut oder sagt?', words:['– bearbeiten –'] },
-    { key:'beduerfnis', title:'Eigentliches Bedürfnis', question:'Was brauche ich jetzt eigentlich?', words:['– bearbeiten –'] },
-    { key:'dazwischen', title:'Was steht dazwischen?', question:'Was steht zwischen mir und diesem Bedürfnis?', words:['– bearbeiten –'] },
-    { key:'bruecke', title:'Brücke', question:'Welche Brücke könnte heute helfen?', words:['– bearbeiten –'] },
-    { key:'verbindung', title:'Verbindung zum Leben', question:'Womit möchte ich heute wieder in Kontakt kommen?', words:['– bearbeiten –'] },
-    { key:'handlung', title:'Konkrete Handlung', question:'Was fühlt sich jetzt stimmig an?', words:['– bearbeiten –'] },
+    { key:'gefuehl', title:'Gefühl', question:'Welches Gefühl liegt da eigentlich darunter?', words:['Angst','Traurigkeit','Einsamkeit','Sehnsucht','Enttäuschung'] },
+    { key:'schutz', title:'Schutzstrategie / Handlungsimpuls', question:'Was versucht mein System zu tun, um Sicherheit herzustellen?', words:['abschalten','nichts mehr fühlen','versuch wieder Kontrolle zu bekommen','analysieren','möglichst still werden'] },
+    { key:'fuersorge', title:'Fürsorge', question:'Wenn jetzt ein Mensch da wäre, bei dem du dich sicher fühlst – was würdest du dir wünschen, dass diese Person tut oder sagt?', words:['zuhören','sortieren','Tee machen','spazieren gehen','einfach da sein'] },
+    { key:'beduerfnis', title:'Eigentliches Bedürfnis', question:'Was brauche ich jetzt eigentlich?', words:['🫂 Sicherheit','🌤 Orientierung ("Was passiert gerade mit mir?")','Chaos sortieren','🤍 Getragen werden','🏡 Geborgenheit'] },
+    { key:'dazwischen', title:'Was steht dazwischen?', question:'Was steht zwischen mir und diesem Bedürfnis?', words:['Angst vor Nähe','ein altes Beschämungsmuster','eine Stimme aus der Vergangenheit','Misstrauen','Erschöpfung'] },
+    { key:'bruecke', title:'Brücke', question:'Welche Brücke könnte heute helfen?', words:['tief durchatmen','Füße spüren','eine Nachricht schreiben','kurz rausgehen','Wasser trinken'] },
+    { key:'verbindung', title:'Verbindung zum Leben', question:'Womit möchte ich heute wieder in Kontakt kommen?', words:['Kreativität','Produktivität','Soziale und emotionale Verbindung','Verantwortung','Dankbarkeit'] },
+    { key:'handlung', title:'Konkrete Handlung', question:'Was fühlt sich jetzt stimmig an?', words:['eine Pause machen','jemanden anrufen','aufschreiben was los ist','sich etwas Gutes tun','liegen bleiben dürfen'] },
   ];
 
   const EXAMPLES = [
@@ -786,8 +789,8 @@
 
       ringWrap.appendChild(g);
       g.addEventListener('pointerdown', (e)=> onPointerDown(e, idx));
-      g.addEventListener('pointerenter', (e)=>{ if(e.pointerType !== 'touch' && ring._rowEl) ring._rowEl.classList.add('visible'); });
-      g.addEventListener('pointerleave', (e)=>{ if(e.pointerType !== 'touch' && !(dragState && dragState.idx===idx) && ring._rowEl) ring._rowEl.classList.remove('visible'); });
+      g.addEventListener('pointerenter', (e)=>{ if(e.pointerType !== 'touch'){ ring._hovering = true; if(ring._rowEl) ring._rowEl.classList.add('visible'); } });
+      g.addEventListener('pointerleave', (e)=>{ if(e.pointerType !== 'touch'){ ring._hovering = false; if(!(dragState && dragState.idx===idx) && ring._rowEl) ring._rowEl.classList.remove('visible'); } });
       guideSvg.appendChild(ringWrap);
       ring._ringWrap = ringWrap;
       ring._markerGroup = g;
@@ -896,7 +899,7 @@
     vibrate(12);
     updateAll(); saveData();
     if(ring._rowEl){
-      setTimeout(()=>{ if(ring._rowEl) ring._rowEl.classList.remove('visible'); }, 1500);
+      setTimeout(()=>{ if(ring._rowEl && !ring._hovering) ring._rowEl.classList.remove('visible'); }, 1500);
     }
     dragState = null;
     window.removeEventListener('pointermove', onPointerMove);
@@ -1190,7 +1193,8 @@
         const url = `${location.origin}${location.pathname}#shared=${encoded}`;
         const textSummary = `Zugangsrad-Kette "${chain.name}":\n` + chain.entries.map(e=>`${e.title}: ${e.word}`).join('\n') + `\n\n${url}`;
         if(navigator.share){
-          try{ await navigator.share({ title: 'Zugangsrad-Kette: ' + chain.name, text: textSummary, url }); return; }catch(e){ /* user cancelled or unsupported, fall through */ }
+          try{ await navigator.share({ title: 'Zugangsrad-Kette: ' + chain.name, text: textSummary, url }); return; }
+          catch(err){ if(err && err.name === 'AbortError') return; /* user cancelled on purpose, do nothing */ }
         }
         try{
           await navigator.clipboard.writeText(textSummary);
@@ -1295,8 +1299,26 @@
 
   // ---------- sources ----------
   const OWN_SOURCES_KEY = 'zugangsrad_own_sources_v1';
+  const SOURCES_SEEDED_KEY = 'zugangsrad_sources_seeded_v1';
+  const SEED_SOURCES = [
+    { title:'Krisendienst Bayern', url:'https://krisendienste.bayern/', category:'Anlaufstellen', note:'Staatlich gefördertes, kostenloses psychosoziales Krisennetz in Bayern, rund um die Uhr telefonisch erreichbar, mit regionalen Kriseninterventionsteams vor Ort.' },
+    { title:'KVB – Psychotherapeutische Versorgung', url:'https://www.kvb.de/patienten/psychotherapeutische-versorgung', category:'Anlaufstellen', note:'Offizielle Patienteninformation der Kassenärztlichen Vereinigung Bayerns zu psychotherapeutischer Versorgung, Sprechstunden und Therapeutensuche.' },
+    { title:'116117 – Psychotherapie-Terminvermittlung', url:'https://www.116117.de/de/psychotherapie.php', category:'Anlaufstellen', note:'Bundesweite ärztliche Bereitschaftsdienstnummer; diese Seite vermittelt Termine für psychotherapeutische Sprechstunden.' },
+    { title:'DGPT – Deutsche Gesellschaft für Psychoanalyse, Psychotherapie, Psychosomatik und Tiefenpsychologie', url:'https://www.dgpt.de/', category:'Fachliche Hintergründe', note:'Berufs- und Fachverband für psychoanalytisch und tiefenpsychologisch arbeitende Psychotherapeut:innen in Deutschland.' },
+    { title:'DGKV – Akzeptanz- und Commitment-Therapie (ACT)', url:'https://dgkv.info/act-co/akzeptanz-und-commitment-therapie-act/', category:'Fachliche Hintergründe', note:'Seite der Deutschsprachigen Gesellschaft für kontextuelle Verhaltenswissenschaften, die ACT als Verfahren der "dritten Welle" der Verhaltenstherapie erklärt.' },
+    { title:'Dorsch – Lexikon der Psychologie', url:'https://dorsch.hogrefe.com/', category:'Fachliche Hintergründe', note:'Anerkanntes deutschsprachiges Nachschlagewerk für psychologische Fachbegriffe, herausgegeben vom Hogrefe Verlag.' },
+    { title:'Modus-Modell nach J. Young', url:'https://schematherapie-rhein-ruhr.de/modusmodell-nach-j-young/', category:'Fachliche Hintergründe', note:'Praxisseite, die das Modus-Modell nach Jeffrey Young erklärt, ein zentrales Konzept der Schematherapie.' },
+  ];
   function loadOwnSources(){ try{ return JSON.parse(localStorage.getItem(OWN_SOURCES_KEY) || '[]'); }catch(e){ return []; } }
   function saveOwnSources(list){ try{ localStorage.setItem(OWN_SOURCES_KEY, JSON.stringify(list)); }catch(e){} }
+  function seedSourcesIfNeeded(){
+    try{
+      if(localStorage.getItem(SOURCES_SEEDED_KEY)) return;
+      const existing = loadOwnSources();
+      saveOwnSources(existing.concat(SEED_SOURCES));
+      localStorage.setItem(SOURCES_SEEDED_KEY, '1');
+    }catch(e){}
+  }
 
   function buildSourcesView(){
     sourcesView.innerHTML = '';
@@ -1541,15 +1563,33 @@
 
   // ---------- sensory pre-check ----------
   const SENSORY_ITEMS = [
-    { icon:'💡', label:'Licht' }, { icon:'🔊', label:'Geräusche' }, { icon:'👕', label:'Enge' },
-    { icon:'🌡', label:'Kälte/Wärme' }, { icon:'👥', label:'Menschen um mich' }
+    { icon:'💡', label:'Licht', tip:'Hilft es, das Licht zu dimmen oder kurz die Augen zu schließen?' },
+    { icon:'🔊', label:'Geräusche', tip:'Kopfhörer, Ohrstöpsel oder ein ruhigerer Ort in der Nähe?' },
+    { icon:'👕', label:'Enge', tip:'Enge Kleidung lockern oder Schuhe ausziehen?' },
+    { icon:'🌡', label:'Kälte/Wärme', tip:'Eine Decke griffbereit oder kurz lüften?' },
+    { icon:'👥', label:'Menschen um mich', tip:'Ist gerade ein kurzer Abstand oder ein ruhiger Moment für dich allein möglich?' },
   ];
   const sensoryChipsWrap = document.getElementById('sensoryChips');
+  const sensoryMessagesWrap = document.getElementById('sensoryMessages');
+  function renderSensoryMessages(){
+    sensoryMessagesWrap.innerHTML = '';
+    SENSORY_ITEMS.forEach(item=>{
+      if(!item._active) return;
+      const m = document.createElement('div');
+      m.style.cssText = 'font-size:12px; color:var(--paper-dim); font-style:italic;';
+      m.textContent = `${item.icon} ${item.tip}`;
+      sensoryMessagesWrap.appendChild(m);
+    });
+  }
   SENSORY_ITEMS.forEach(item=>{
     const chip = document.createElement('div');
     chip.className = 'sensory-chip';
     chip.textContent = `${item.icon} ${item.label}`;
-    chip.addEventListener('click', ()=> chip.classList.toggle('active'));
+    chip.addEventListener('click', ()=>{
+      chip.classList.toggle('active');
+      item._active = chip.classList.contains('active');
+      renderSensoryMessages();
+    });
     sensoryChipsWrap.appendChild(chip);
   });
 
@@ -1568,11 +1608,12 @@
     btn.addEventListener('click', ()=>{
       const already = btn.classList.contains('active');
       tofWrap.querySelectorAll('.tof-btn').forEach(b=>b.classList.remove('active'));
-      tofOverlay.classList.remove('tof-under','tof-over');
+      tofOverlay.classList.remove('tof-under','tof-over','tof-in');
       if(!already){
         btn.classList.add('active');
         if(opt.key==='under') tofOverlay.classList.add('tof-under');
         if(opt.key==='over') tofOverlay.classList.add('tof-over');
+        if(opt.key==='in') tofOverlay.classList.add('tof-in');
       }
     });
     tofWrap.appendChild(btn);
@@ -1609,6 +1650,7 @@
 
   customHues = loadColors();
   rings = loadData();
+  seedSourcesIfNeeded();
   const firstEver = !localStorage.getItem(ONBOARD_KEY);
   setMode('dial', firstEver);
 
