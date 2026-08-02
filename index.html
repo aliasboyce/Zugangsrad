@@ -825,7 +825,7 @@
 
       ringWrap.appendChild(g);
       g.addEventListener('pointerdown', (e)=> onPointerDown(e, idx));
-      g.addEventListener('pointerenter', (e)=>{ if(e.pointerType !== 'touch'){ ring._hovering = true; if(ring._rowEl) ring._rowEl.classList.add('visible'); flashActiveQuestion(idx); } });
+      g.addEventListener('pointerenter', (e)=>{ if(e.pointerType !== 'touch'){ ring._hovering = true; if(ring._rowEl) ring._rowEl.classList.add('visible'); } });
       g.addEventListener('pointerleave', (e)=>{ if(e.pointerType !== 'touch'){ ring._hovering = false; if(!(dragState && dragState.idx===idx) && ring._rowEl) ring._rowEl.classList.remove('visible'); } });
       guideSvg.appendChild(ringWrap);
       ring._ringWrap = ringWrap;
@@ -912,7 +912,7 @@
     aqBanner.classList.add('visible');
     aqDim.classList.add('visible');
     clearTimeout(aqHideTimer);
-    aqHideTimer = setTimeout(hideActiveQuestion, 1300);
+    aqHideTimer = setTimeout(hideActiveQuestion, 2000);
   }
   function hideActiveQuestion(){
     clearTimeout(aqHideTimer);
