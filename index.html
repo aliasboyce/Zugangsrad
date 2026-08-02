@@ -64,6 +64,34 @@
   .dial-column{ flex:1; min-width:300px; display:flex; flex-direction:column; align-items:center; gap:14px; }
   @media (max-width: 760px){ .dial-column{ order:2; } }
 
+  #aqDim{
+    position:fixed; inset:0; background:rgba(10,9,11,0.45);
+    opacity:0; pointer-events:none; z-index:45;
+    transition: opacity .25s ease;
+    will-change: opacity;
+  }
+  #aqDim.visible{ opacity:1; }
+
+  .aq-banner{
+    position:absolute; top:50%; left:50%;
+    max-width: 86%; width:max-content;
+    display:flex; align-items:center; gap:14px;
+    background: var(--bg-soft); border:1px solid rgba(201,167,105,0.4); border-radius:16px;
+    padding:16px 24px;
+    box-shadow: 0 20px 50px -12px rgba(0,0,0,0.65);
+    opacity:0; transform: translate(-50%,-50%) scale(0.9);
+    pointer-events:none; z-index:55;
+    transition: opacity .22s ease, transform .22s cubic-bezier(.22,.9,.32,1);
+    will-change: opacity, transform;
+  }
+  .aq-banner.visible{ opacity:1; transform: translate(-50%,-50%) scale(1); }
+  .aq-num{
+    flex-shrink:0; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'Inter',sans-serif; font-weight:700; font-size:15px; color:#16151a;
+  }
+  .aq-text b{ display:block; font-family:'Fraunces',serif; font-weight:700; font-size:17px; line-height:1.25; }
+  .aq-text span{ display:block; font-size:13.5px; line-height:1.4; color: var(--paper-dim); margin-top:2px; max-width:320px; }
+
   .dial-zoom-wrap{ position:relative; width:100%; display:flex; justify-content:center; touch-action:none; }
   .dial-wrap{
     position:relative; width:100%; max-width: 860px; aspect-ratio: 1/1;
@@ -307,6 +335,14 @@
           <div id="tofSelector" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
         </div>
         <div class="dial-zoom-wrap" id="dialZoomWrap">
+          <div id="aqDim"></div>
+          <div id="aqBanner" class="aq-banner">
+            <div class="aq-num" id="aqNum"></div>
+            <div class="aq-text">
+              <b id="aqTitle"></b>
+              <span id="aqQuestion"></span>
+            </div>
+          </div>
           <div class="dial-wrap" id="dialWrap">
             <div class="dial-shadow"></div>
             <svg class="guides" viewBox="0 0 100 100" id="guideSvg"></svg>
@@ -789,7 +825,7 @@
 
       ringWrap.appendChild(g);
       g.addEventListener('pointerdown', (e)=> onPointerDown(e, idx));
-      g.addEventListener('pointerenter', (e)=>{ if(e.pointerType !== 'touch'){ ring._hovering = true; if(ring._rowEl) ring._rowEl.classList.add('visible'); } });
+      g.addEventListener('pointerenter', (e)=>{ if(e.pointerType !== 'touch'){ ring._hovering = true; if(ring._rowEl) ring._rowEl.classList.add('visible'); flashActiveQuestion(idx); } });
       g.addEventListener('pointerleave', (e)=>{ if(e.pointerType !== 'touch'){ ring._hovering = false; if(!(dragState && dragState.idx===idx) && ring._rowEl) ring._rowEl.classList.remove('visible'); } });
       guideSvg.appendChild(ringWrap);
       ring._ringWrap = ringWrap;
@@ -860,6 +896,30 @@
     });
   }
 
+  const aqBanner = document.getElementById('aqBanner');
+  const aqDim = document.getElementById('aqDim');
+  const aqNum = document.getElementById('aqNum');
+  const aqTitle = document.getElementById('aqTitle');
+  const aqQuestion = document.getElementById('aqQuestion');
+  let aqHideTimer = null;
+  function flashActiveQuestion(idx){
+    const ring = rings[idx];
+    aqNum.style.background = ringColor(idx,70,68);
+    aqNum.textContent = idx+1;
+    aqTitle.textContent = ring.title;
+    aqTitle.style.color = ringColor(idx,68,72);
+    aqQuestion.textContent = ring.question;
+    aqBanner.classList.add('visible');
+    aqDim.classList.add('visible');
+    clearTimeout(aqHideTimer);
+    aqHideTimer = setTimeout(hideActiveQuestion, 1300);
+  }
+  function hideActiveQuestion(){
+    clearTimeout(aqHideTimer);
+    aqBanner.classList.remove('visible');
+    aqDim.classList.remove('visible');
+  }
+
   function onPointerDown(e, idx){
     if(activePointers.size >= 2) return;
     e.preventDefault();
@@ -869,6 +929,7 @@
     if(g) g.classList.remove('snapping');
     if(ring._boxEl) ring._boxEl.classList.add('dragging');
     if(ring._rowEl) ring._rowEl.classList.add('visible');
+    flashActiveQuestion(idx);
     rings.forEach((r,i)=>{ if(i!==idx && r._boxEl) r._boxEl.classList.add('dimmed'); });
     const startAngle = pointerAngle(e.clientX, e.clientY, c);
     dragState = { idx, startAngle, startRotation: ring.rotation };
